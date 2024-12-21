@@ -7,10 +7,8 @@ urlpatterns = [
   path('', views.index), # localhost:8000
   path('cats/<int:cat_id>/', views.categories), # пример возможного url: localhost:8000/cats/2/
   path('cats/<slug:cat_slug>/', views.categories_by_slug), # пример возможного url: localhost:8000/cats/cdcsdcsd/
-  # позволяет прописать url используя регулярное выражение
-  re_path(r'^archive/(?P<year>[0-9]{4})/', views.archive), # пример возможного url: localhost:8000/archive/2002
   # объявление url с собственным конвертером
-  path('another/archive/<year4:year>/', views.archive), # пример возможного url: localhost:8000/archive/2002
+  path('archive/<year4:year>/', views.archive), # пример возможного url: localhost:8000/archive/2002
 ]
 
 '''

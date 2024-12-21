@@ -7,19 +7,14 @@ urlpatterns = [
     path('', include('women.urls')),
 ]
 
-'''
-Прописывая url адресов в основном приложении не правильно, так как нарушается приницип автономности приложений
-(если поменяются url адреса в одном приложении, то в этом надо будет руками изменения править, а это плохо)
+# добавляет обработчик на страницу, который при ошибке 404 отрабатывает функцию page_not_found
+handler404 = views.page_not_found
 
-Так не правильно !!!
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.index), # localhost:8000
-    path('cats/', views.categories), # localhost:8000/cats/
-]
-Так правильно
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('women.urls')),
-]
+'''
+Обработчики исключений работают только тогда, когда DEBUG=False
+Виды обработчиков исключений:
+* handler400 - если невозможно обработать запрос
+* handler403 - доступ запрещен
+* handler404 - страница не найдена
+* handler500 - внутренняя ошибка сервера
 '''
