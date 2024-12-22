@@ -1,7 +1,9 @@
 from django.db import models
+from django.urls import reverse
 
 class Women(models.Model):
   title = models.CharField(max_length=255)
+  slug = models.SlugField(max_length=255, unique=True, db_index=True)
   content = models.TextField(blank=True)
   time_create = models.DateTimeField(auto_now_add=True)
   time_update = models.DateTimeField(auto_now=True)
@@ -15,6 +17,9 @@ class Women(models.Model):
     indexes = [
       models.Index(fields=['-time_create']) # задает индексирование поля time_create с учетом сортировки (т.к добавили символ "-")
     ]
+
+  def get_absolute_url(self): # специальный метод, который может использовать admin панель для построения ссылок к конкретным записят модели
+    return reverse('post', kwargs={'post_slug': self.slug})
 
 '''
 !По умолчанию все запросы к базе данных являются ленивыми
