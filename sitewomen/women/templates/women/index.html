@@ -1,20 +1,12 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ title }}</title>
-</head>
-<body>
-  <ul>
-    <li><a href="{% url 'home' %}">Главная страница</a></li>
-    {% for m in menu %}
-    {% if not forloop.last %}<li>{% else %}<li class="last">{% endif %}
-      <a href="{% url m.url_name %}">{{ m.title }}</a>
-    </li>
-    {% endfor %}
-  </ul>
-  <h1>{{ title }}</h1>
+{% extends 'base.html' %}
+{% block content %}
+  <h1>{{ title }}</h1> 
+
+  <!-- Позволяет подключать в html кусочки html из других файлов -->
+  <!-- Атрибут only запретит передавать в nav.html атрибуты, которые подключаются в html в методе render -->
+   <!-- Можно передавать свои атрибуты используя параметр with, после которого идет описание передаваемых аргументов -->
+  {% include 'women/includes/nav.html' only with title2='some' %}
+
   <ul>
   {% for p in posts %}
     {% if p.is_published %}
@@ -29,34 +21,7 @@
       {% endif %}
     {% endfor %}
   </ul>
-</body>
-</html>
 
-<!--
-Теги в шаблонах:
-! Данные теги отрабатывают на стороне сервера
-----------------------------------
-* for - позволяет итерироваться по спискам
-! внутри цикла for есть объект forloop у которого есть атрибуты:
-  1. counter - счетчик (отчет с 1) 
-  2. counter0 - счетчик (отчет с 0) 
-  3. revcounter - счетчик (отчет с последнего до 1)
-  4. revcounter0 - счетчик (отчет с последнего до 0)
-  5. first - первая ли сейчас итерация (возвращает True или False)
-  6. last - последняя ли сейчас итерация (возвращает True или False)
-Пример:
-{% for p in posts %}
-  <h2>{{ p }}</h2>
-{% endfor %}
-----------------------------------
-* if - позволяет добавить условные выражения
-Пример:
-{% if not forloop.last %}
-  <hr>
-{% endif %}
--->
+  {% include 'women/includes/nav.html '%}
 
-<!-- * url - позволяет динамически генерировать url адрес для ссылок
-! работает по аналогии с функцией reverse из django.urls
-Пример:
-women.views строка 44 пример -->
+{% endblock %}
