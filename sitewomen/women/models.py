@@ -1,13 +1,40 @@
 from django.db import models
 from django.urls import reverse
 
+class PublishedManager(models.Manager): # создание кастомного менеджера по типу models.OBJECTS
+  def get_queryset(self): # метод отвечает за конечный базовый QuerySet, который можно уже в дальнейшем фильтровать, сортировать и т.д
+    return super().get_queryset().filter(is_published=Women.Status.PUBLISHED)
+
 class Women(models.Model):
+  class Status(models.IntegerChoices):
+    DRAFT = 0, 'Черновик'
+    PUBLISHED = 1, 'Опубликовано'
+
+  '''
+  Women.Status.choices - позволяет получить список кортежей, возможных значений
+  Пример:
+  [(0, 'Черновик'), (1, 'Опубликовано')]
+  --------------------------------------
+  Women.Status.labels - получение метод
+  Пример:
+  ['Черновик', 'Опубликовано']
+  --------------------------------------
+  Women.Status.values - получение значений
+  Пример:
+  [0, 1]
+  '''
+
   title = models.CharField(max_length=255)
   slug = models.SlugField(max_length=255, unique=True, db_index=True)
   content = models.TextField(blank=True)
   time_create = models.DateTimeField(auto_now_add=True)
   time_update = models.DateTimeField(auto_now=True)
-  is_published = models.BooleanField(default=True)
+  is_published = models.BooleanField(choices=Status.choices, default=Status.PUBLISHED)
+
+  # При подключении своего собственного менеджера, менеджер objects становится недоступным
+  published = PublishedManager()
+  # Чтобы иметь возможность использовать оба менеджера нужно явно его указать еще и objects менеджер
+  objects = models.Manager()
 
   def __str__(self):
     return self.title

@@ -16,7 +16,7 @@ cats_db = [
 ]
 
 def index(request): # request экземпляр класса HttpRequest
-  posts = Women.objects.filter(is_published=1)
+  posts = Women.published.filter(is_published=1)
   data = {
     'title': 'Главная страница', 
     'menu': menu, 
@@ -53,7 +53,7 @@ def page_not_found(request, exception):
   return HttpResponseNotFound("<h1>Страница не найдена</h1>")
 
 def show_category(request, cat_id):
-  posts = Women.objects.filter(is_published=1)
+  posts = Women.published.filter(is_published=1)
   data = {
     'title': 'Отображение по рубрикам', 
     'menu': menu, 
