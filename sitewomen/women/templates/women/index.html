@@ -6,18 +6,27 @@
   <title>{{ title }}</title>
 </head>
 <body>
+  <ul>
+    <li><a href="{% url 'home' %}">Главная страница</a></li>
+    {% for m in menu %}
+    {% if not forloop.last %}<li>{% else %}<li class="last">{% endif %}
+      <a href="{% url m.url_name %}">{{ m.title }}</a>
+    </li>
+    {% endfor %}
+  </ul>
   <h1>{{ title }}</h1>
   <ul>
-    {% for p in posts %}
-      {% if p.is_published %}
-        <li>
-          <h2>{{ p.title }}</h2>
-          <p>{{ p.content }}</p>
-          {% if not forloop.last %}
-            <hr>
-          {% endif %}
-        </li>
+  {% for p in posts %}
+    {% if p.is_published %}
+      <li>
+        <h2>{{ p.title }}</h2>
+        <p>{{ p.content }}</p>
+        <p><a href='{% url "post" p.id %}'>Читать пост</a></p>
+        {% if not forloop.last %}
+          <hr>
         {% endif %}
+      </li>
+      {% endif %}
     {% endfor %}
   </ul>
 </body>
@@ -45,5 +54,9 @@
 {% if not forloop.last %}
   <hr>
 {% endif %}
-----------------------------------
 -->
+
+<!-- * url - позволяет динамически генерировать url адрес для ссылок
+! работает по аналогии с функцией reverse из django.urls
+Пример:
+women.views строка 44 пример -->

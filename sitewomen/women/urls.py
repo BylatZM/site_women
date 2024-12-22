@@ -6,30 +6,8 @@ register_converter(converters.FourDigitYearConverter, "year4") # функция 
 urlpatterns = [
   path('', views.index, name='home'), # localhost:8000
   path('about/', views.about, name='about'), # localhost:8000/about/
-  path('cats/<int:cat_id>/', views.categories, name='cats_id'), # пример возможного url: localhost:8000/cats/2/
-  path('cats/<slug:cat_slug>/', views.categories_by_slug, name='cats'), # пример возможного url: localhost:8000/cats/cdcsdcsd/
-  # объявление url с собственным конвертером
-  path('archive/<year4:year>/', views.archive, name='archive'), # пример возможного url: localhost:8000/archive/2002
+  path('addpage/', views.addpage, name="add_page"), # localhost:8000/add_page/
+  path('contact/', views.contact, name="contact"), # localhost:8000/contact/
+  path('login/', views.login, name='login'), # localhost:8000/login/
+  path('post/<int:post_id>/', views.show_post, name='post'),  # localhost:8000/post/1/
 ]
-
-'''
-При запросе django проходиться по всем path и смотрит, где совпадает url адрес, после нахождения совпадения отрабатывает определенная
-функция view
-
-path('cats/<int:cat_id>/', ...) - такому path в url должно передаваться только число, которое будет присвоено переменной cat_id
-cat_id можно будет получить в функции views.categories
-
-виды конвертаров в url:
-* str - принимает строку, КРОМЕ символа "/"
-* int - принимает числовые значения
-* slug - набор английских букв, цифр, подчеркиваний, дефисов, КРОМЕ символа "/"
-* uuid - принимает цифры, малые английские буквы и дефис
-* path - любая не пустая строка, включая символ "/"
-
-Конвертер slug включается в себя конвертер int, поэтому, если url будут совпадать, и при этом url где принимается конвертер
-slug будет стоять выше, то path с url включающий конвертер int никогда не сработает
-
-Второй path не сработает, так как будет всегда отрабатывать первый !!
-path('cats/<slug:cat_slug>/', views.categories_by_slug)
-path('cats/<int:cat_id>/', views.categories)
-'''
