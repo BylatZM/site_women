@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, HttpResponsePermanentRedirect
 from datetime import datetime
 from django.shortcuts import redirect, reverse
 
@@ -22,7 +22,8 @@ def categories_by_slug(request, cat_slug):
 def archive(request, year):
   if year > datetime.now().year:
     uri = reverse('cats', args=('music', )) # функция reverse формирует url адрес, позволяет удобно передавать аргументы через список, кортеж
-    return redirect(uri) # делает редирект на основную страницу с кодом 302
+    return HttpResponseRedirect(uri) # альтернатива redirect, делает перенаправление с кодом 302, принимает либо строку url либо результат функции reverse
+    #return HttpResponsePermanentRedirect(uri) # альтернатива redirect, делает перенаправление с кодом 301, принимает либо строку url либо результат функции reverse
   return HttpResponse(f"<h1>Архив по годам</h1><p>{year}</p>")
 
 # функция для обработки ошибки 404
