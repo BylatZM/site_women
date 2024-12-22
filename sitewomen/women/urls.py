@@ -1,10 +1,11 @@
-from django.urls import path, re_path, register_converter
+from django.urls import path, register_converter
 from . import views, converters
 
 register_converter(converters.FourDigitYearConverter, "year4") # функция регистрации собственных конвертеров
 
 urlpatterns = [
   path('', views.index, name='home'), # localhost:8000
+  path('about/', views.about, name='about'), # localhost:8000/about/
   path('cats/<int:cat_id>/', views.categories, name='cats_id'), # пример возможного url: localhost:8000/cats/2/
   path('cats/<slug:cat_slug>/', views.categories_by_slug, name='cats'), # пример возможного url: localhost:8000/cats/cdcsdcsd/
   # объявление url с собственным конвертером

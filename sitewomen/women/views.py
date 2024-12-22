@@ -1,11 +1,13 @@
 from django.http import HttpResponse, HttpResponseNotFound
 from datetime import datetime
-from django.shortcuts import redirect, reverse
-from django.template.loader import render_to_string # функция преобразует html шаблоны в строку, чтобы их можно было передавать в соответствующие классы
+from django.shortcuts import render, redirect
+from django.urls import reverse
 
 def index(request): # request экземпляр класса HttpRequest
-  t = render_to_string('women/index.html') # преобразует html в строку
-  return HttpResponse(t) 
+  return render(request, "women/index.html") # функция преобразует html в строку и возвращает результат, как HttpResponse
+
+def about(request):
+  return render(request, "women/about.html")
 
 def categories(request, cat_id): # cat_id параметр, который передается через url для маршрута localhost:8000/cats/<число>/
   return HttpResponse(f"<h1>Статьи по категориям</h1><p>id: {cat_id}</p>")
