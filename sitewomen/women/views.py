@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from datetime import datetime
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.template.defaultfilters import slugify # как работает смотри в файле women/templates/women/index.html
 
 menu = ['О сайте', 'Добавить статью', 'Обратная связь', 'Войти']
 
@@ -12,13 +13,14 @@ class MyClass:
 
 def index(request): # request экземпляр класса HttpRequest
   data = {
-    'title': 'Главная страница', 
+    'title': 'главная страница', 
     'menu': menu, 
     'float': 28.56, 
     'lst': [1, 2, 'abc', True], 
     'set': {1, 2, 3, 2, 5}, 
     'dict': {'key_1': 'value_1', 'key_2': 'value_2'},
     'obj': MyClass(10, 20),
+    'url': slugify("The main page")
   }
   return render(request, "women/index.html", context=data) # функция преобразует html в строку и возвращает результат, как HttpResponse
 
