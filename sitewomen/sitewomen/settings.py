@@ -105,3 +105,5 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # python manage.py runserver --insecure - позволяет запустить веб сервер в режиме DEBUG=FALSE при этом статика будет подключаться
+
+# python manage.py shell - команда запускает в терминале оболочку django, позволяет выполнять ORM команды для работы с базой данных
