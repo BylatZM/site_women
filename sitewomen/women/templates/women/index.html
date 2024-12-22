@@ -1,19 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h1>{{ title }}</h1> 
-
-  <!-- Позволяет подключать в html кусочки html из других файлов -->
-  <!-- Атрибут only запретит передавать в nav.html атрибуты, которые подключаются в html в методе render -->
-   <!-- Можно передавать свои атрибуты используя параметр with, после которого идет описание передаваемых аргументов -->
-  {% include 'women/includes/nav.html' only with title2='some' %}
-
-  <ul>
+  <ul class="list-articles">
   {% for p in posts %}
     {% if p.is_published %}
-      <li>
-        <h2>{{ p.title }}</h2>
-        <p>{{ p.content }}</p>
-        <p><a href='{% url "post" p.id %}'>Читать пост</a></p>
+      <li><h2>{{ p.title }}</h2>
+        {% autoescape off %} <!-- Отключает экранирование (теперь html теги внутри строки воспринимаются браузером) -->
+        {{ p.content|linebreaks|truncatewords:40 }}
+        {% endautoescape %}
+          <div class="clear"></div>
+          <p class="link-read-post"><a href='{% url "post" p.id %}'>Читать пост</a></p>
         {% if not forloop.last %}
           <hr>
         {% endif %}
@@ -22,6 +17,17 @@
     {% endfor %}
   </ul>
 
-  {% include 'women/includes/nav.html '%}
-
 {% endblock %}
+
+'''
+Еще фильтры в html: 
+-------------------
+* truncatewords - ограничивает количетсов символов выводимых в строке, добавляет многоточие, 
+если количество символов в строке было больше, чем указано в фильтре
+Пример:
+<p>{{ p.content|truncatewords:50 }}</p>
+-------------------
+* linebreaks - учитывает отступы в строке
+Пример:
+<p>{{ p.content|linebreaks }}</p>
+'''

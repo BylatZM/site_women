@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', # нужно чтобы django мог подключать статические файлы к проекту
     'women.apps.WomenConfig',
 ]
 
@@ -92,9 +92,16 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+# по умолчанию в режиме разработки (DEBUG=True) django ищет нужные статичные файлы внутри папок static, которые находятся в папке с приложениями (к примеру, women),
+# которые должны быть обязательно указаны INSTALLED_APPS
+# python manage.py collectstatic - берет всю статику из приложений из папок static и переносит все в одну корневую папку static (нужно для продакшен версии)
+STATIC_URL = 'static/' # префикс для URL-адреса по которому будет идти обращение к статическому файлу
+STATIC_ROOT = BASE_DIR / STATIC_URL # путь к общей статической папке
+#STATICFILES_DIRS # список дополнительных (нестандартных) путей к статическим файлам, используемых для сбора и режима отладки
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# python manage.py runserver --insecure - позволяет запустить веб сервер в режиме DEBUG=FALSE при этом статика будет подключаться
