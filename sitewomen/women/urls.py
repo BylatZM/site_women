@@ -4,11 +4,11 @@ from . import views, converters
 register_converter(converters.FourDigitYearConverter, "year4") # функция регистрации собственных конвертеров
 
 urlpatterns = [
-  path('', views.index), # localhost:8000
-  path('cats/<int:cat_id>/', views.categories), # пример возможного url: localhost:8000/cats/2/
-  path('cats/<slug:cat_slug>/', views.categories_by_slug), # пример возможного url: localhost:8000/cats/cdcsdcsd/
+  path('', views.index, name='home'), # localhost:8000
+  path('cats/<int:cat_id>/', views.categories, name='cats_id'), # пример возможного url: localhost:8000/cats/2/
+  path('cats/<slug:cat_slug>/', views.categories_by_slug, name='cats'), # пример возможного url: localhost:8000/cats/cdcsdcsd/
   # объявление url с собственным конвертером
-  path('archive/<year4:year>/', views.archive), # пример возможного url: localhost:8000/archive/2002
+  path('archive/<year4:year>/', views.archive, name='archive'), # пример возможного url: localhost:8000/archive/2002
 ]
 
 '''
