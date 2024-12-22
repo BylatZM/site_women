@@ -1,4 +1,5 @@
 {% load static %}
+{% load women_tags %} <!-- Чтобы можно было использовать кастомные теги из файла wome/templatetags/women_tags.py-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,10 +32,13 @@
 <!-- Sidebar слева -->
 	<td valign="top" class="left-chapters">
 	<ul id="leftchapters">
+    {% get_cats as categories %} <!-- Используем as чтобы получить возвращаемый список, на прямую нельзя т.к get_categories - это тег -->
 		<li class="selected">Все категории</li>
-		<li><a href="#">Актрисы</a></li>
-		<li><a href="#">Певицы</a></li>
-		<li><a href="#">Спортсменки</a></li>
+
+		{%for cat in categories %}
+    <li><a href="{% url 'category' cat.id %}">{{ cat.name }}</a></li>
+    {% endfor %}
+
 		<li class="share">
 		<p>Наш канал</p>
 		<a class="share-yt" href="https://www.youtube.com/channel/UClJzWfGWuGJL2t-3dYKcHTA/playlists" target="_blank" rel="nofollow"></a>

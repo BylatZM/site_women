@@ -10,4 +10,5 @@ urlpatterns = [
   path('contact/', views.contact, name="contact"), # localhost:8000/contact/
   path('login/', views.login, name='login'), # localhost:8000/login/
   path('post/<int:post_id>/', views.show_post, name='post'),  # localhost:8000/post/1/
+  path('category/<int:cat_id>/', views.show_category, name='category'), # localhost:8000/category/1
 ]
