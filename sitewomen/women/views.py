@@ -26,7 +26,8 @@ def index(request): # request экземпляр класса HttpRequest
   data = {
     'title': 'Главная страница', 
     'menu': menu, 
-    'posts': data_db
+    'posts': data_db,
+    'cat_selected': 0,
   }
   return render(request, "women/index.html", context=data) # функция преобразует html в строку и возвращает результат, как HttpResponse
 
@@ -49,4 +50,10 @@ def page_not_found(request, exception):
   return HttpResponseNotFound("<h1>Страница не найдена</h1>")
 
 def show_category(request, cat_id):
-  return index(request) # заглушка, которая просто перезагружает страницу
+  data = {
+    'title': 'Отображение по рубрикам', 
+    'menu': menu, 
+    'posts': data_db,
+    'cat_selected': cat_id,
+  }
+  return render(request, "women/index.html", context=data)
