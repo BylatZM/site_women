@@ -21,6 +21,11 @@ class Women(models.Model):
   # Модели Women будет соответствовать ОДНА запись из модели Category
   # related_name изменяет название менеджера записи, который позволит с экземпляров класса Category получать все связанные записи из модели Women
   cat = models.ForeignKey(to="Category", on_delete=models.PROTECT, related_name="posts")
+  # TagPost прописали в виде строки, так как класс определен ниже и мы пытаемся вызвать не определенный класс
+  # Модели TagPost будет соответствовать МНОЖЕСТВО записей из модели Women
+  # Модели Women будет соответствовать МНОЖЕСТВО записей из модели TagPost
+  # related_name изменяет название менеджера записи, который позволит с экземпляров класса TagPost получать все связанные записи из модели Women
+  tags = models.ManyToManyField('TagPost', blank=True, related_name='tags')
 
   # При подключении своего собственного менеджера, менеджер objects становится недоступным
   published = PublishedManager()
@@ -49,6 +54,13 @@ class Category(models.Model):
   def get_absolute_url(self):
     return reverse('category', kwargs={'cat_slug': self.slug})
 
+
+class TagPost(models.Model):
+  tag = models.CharField(max_length=100, db_index=True)
+  slug = models.SlugField(max_length=255, unique=True, db_index=True)
+
+  def __str__(self):
+    return self.tag
 '''
 Типы связей между моделями в django:
 -------------------------------------------------------
@@ -80,11 +92,42 @@ Women.objects.filter(cat__slug__contains="ы") - позволяет отобра
 где связанные с нип объект из модели Category имеет атрибут name содержащий в себе подстроку "ы"
 <QuerySet [...]>
 
-Параметры:
+Обязательные параметры:
 to - ссылка или строка класса модели, с которой происходит связывание (в нашем случае это класс Category - модели для категорий)
 on_delete - тип ограничения при удалении внешней записи (в нашем примере - это удаление из таблицы Category)
 -------------------------------------------------------
 * ManyToManyField - для связей Many to Many (многие ко многим)
+
+Пример:
+tags = models.ManyToManyField('TagPost', blank=True, related_name='tags')
+
+! для данной виды связи создается еще одна таблица базы данных с названием <имя приложение>_<имя первой модели>_<имя второй модели>, 
+где определены поля id, <название первой модели>_id, <название второй модели>_id
+
+w = Women.objects.get(pk=1)
+tag_br, tag_o, tag_v = TagPost.objects.filter(id__in=[1, 3, 5])
+w.tags.set([tag_br, tag_o, tag_v]) - связываем экземпляр модели Women с 3 записями из модели TagPost
+
+w.tags.remove(tag_o) - если нужно удалить связь между экземпляром модели Women с экземпляром модели TagPost
+
+w.tags.add(tag_br) - связываем экземпляр модели Women с одной записью из модели TagPost
+
+w.tags.all() - получить все записи из модели TagPost связанные с экземпляром модели Women
+
+tag_br.tags.all() - получить все записи из модели Women связанные с экземпляром модели TagPost
+
+b = Women.objects.get(pk=2)
+tag_br.tags.add(b) - связываем экземпляр модели TagPost с одной записью из модели Women
+
+! нельзя создавать запись и сразу добавлять связи многие ко многим, так как у создаваемой записи еще не существует id
+Women.objects.create(title='Ариана Гранде', slug='ariana', cat_id=2, tags=[tag_br, tag_v]) - НЕДОПУСТИМО!!!
+
+w = Women.objects.create(title='Ариана Гранде', slug='ariana', cat_id=2)
+w.tags.set([tag_br, tag_v]) - так правильно
+
+Обязательный параметр:
+to - ссылка или строка класса модели, с которой происходит связывание (в нашем случае это класс TagPost)
+-------------------------------------------------------
 * OneToOneField - для связей One to One (один к одному)
 '''
 
