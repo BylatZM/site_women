@@ -149,4 +149,29 @@ c2 = Category.objects.get(pk=2)
 c2.posts.count() - метод возвращает количество записей из модели Women связанных с объектом c2 модели Category
 
 Women.objects.filter(cat_id=1).count() - тоже отбирает количество записей, результат - число
+------------------------------------------------------------
+from django.db.models import F - класс, позволяющий обращаться к отдельным полям и производить над ними мат. вычисления
+
+Women.objects.filter(pk__gt=F("cat_id"))
+* отберет все записи, у которых id больше чем значение cat_id этого же поля
+------------------------------------------------------------
+h = Husband.objects.get(pk=1)
+h.m_count = F("m_count") + 1
+h.save() - изменит m_count на +1
+
+h.m_count += 1 - НЕДОПУСТИМА могут возникать неопределенности при одновременном изменении одной записи
+h.m_count = F("m_count") + 1 - правильный вариант
+h.m_count = 3 - допустимый вариант
+------------------------------------------------------------
+Husband.objects.all().annotate(is_married=Value(True))
+* возвращает список QuerySet, где дополнительно формируется поле is_married типа boolean
+
+Husband.objects.all().annotate(is_married=F("m_count") * 3)
+Husband.objects.all().annotate(work_age=F("age") - 20, salary=F("age") * 1.1)
+
+annotate - метод позволяет генерировать список новых полей для выборки
+from django.db.models import Value - позволяет явно указать новое значение для генерируемого поля в методе annotate
+
+Husband.objects.all().annotate(is_married=True) - НЕДОПУСТИМО !!!
+Husband.objects.all().annotate(is_married=Value(True)) - правильный вариант
 '''
