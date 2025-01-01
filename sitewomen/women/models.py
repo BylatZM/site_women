@@ -26,6 +26,11 @@ class Women(models.Model):
   # Модели Women будет соответствовать МНОЖЕСТВО записей из модели TagPost
   # related_name изменяет название менеджера записи, который позволит с экземпляров класса TagPost получать все связанные записи из модели Women
   tags = models.ManyToManyField('TagPost', blank=True, related_name='tags')
+  # Husband прописали в виде строки, так как класс определен ниже и мы пытаемся вызвать не определенный класс
+  # Модели Husband будет соответствовать ОДНА запись из модели Women
+  # Модели Women будет соответствовать ОДНА запись из модели Husband
+  # related_name изменяет название менеджера записи, который позволит с экземпляра класса Husband получать связанную запись из модели Women 
+  husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True, related_name='woman')
 
   # При подключении своего собственного менеджера, менеджер objects становится недоступным
   published = PublishedManager()
@@ -65,6 +70,12 @@ class TagPost(models.Model):
   def get_absolute_url(self):
     return reverse('tag', kwargs={'tag_slug': self.slug})
   
+class Husband(models.Model):
+  name = models.CharField(max_length=100)
+  age = models.IntegerField(null=True)
+
+  def __str__(self):
+    return self.name
 
 '''
 Типы связей между моделями в django:
@@ -134,6 +145,37 @@ w.tags.set([tag_br, tag_v]) - так правильно
 to - ссылка или строка класса модели, с которой происходит связывание (в нашем случае это класс TagPost)
 -------------------------------------------------------
 * OneToOneField - для связей One to One (один к одному)
+
+Пример:
+husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True, related_name='woman')
+
+w = Women.objects.get(pk=1)
+h = Husband.objects.get(pk=1)
+w.husband = h - связываем объект w модели Women с объектом h модели Husband
+w.save() - делаем sql запрос на обновление данных в базе
+
+w.husband - получить объект модели Husband связанный с объектом w модели Women
+
+h.woman - получить объект модели Women связанный с объектом h модели Husband
+
+w = Women.objects.get(pk=2)
+h = Husband.objects.get(pk=2)
+h.woman = w - связываем объект h модели Husband с объектом w модели Women
+w.save() - делаем сохранение уменного у объекта w модели Women т.к изменение выше - это изменение объекта w модели Women !!!
+
+w = Women.objects.get(pk=3)
+h = Husband.objects.get(pk=2) - данный объект уже связан с объектом Women.objects.get(pk=2)
+w.husband = h - команда проходит
+w.save() - вернет ОШИБКУ т.к объект h модели Husband связан с объектом Women.objects.get(pk=2)
+
+Women.objects.filter(pk=3).husband - запусть НЕДОПУСТИМА, чтобы получить атрибут нам нужно работать с объектом, а не список QuerySet
+
+w = Women.objects.get(pk=1)
+w.husband.name - можем получить атрибуты объекта husband модели Husband
+
+w = Women.objects.get(pk=1)
+w.husband.age = 30 - изменяем экземпляр объекта husband
+w.husband.save() - сохраняет изменения в объекте husband
 '''
 
 '''
