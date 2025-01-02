@@ -174,4 +174,40 @@ from django.db.models import Value - позволяет явно указать 
 
 Husband.objects.all().annotate(is_married=True) - НЕДОПУСТИМО !!!
 Husband.objects.all().annotate(is_married=Value(True)) - правильный вариант
+------------------------------------------------------------
+from django.db.models import Count, Sum, Avg, Max, Min - агрегирующие функции можно использовать только внутри метода aggregate
+
+* Count - подсчет количества записей
+
+* Sum - суммирование значений поля
+
+* Avg - среднее значение
+Husband.objects.aggregate(Avg("age")) - возвращает словарь, с ключем age__avg со средним значением для поля age
+Пример вывода: {'age__avg': 31.5}
+
+* Max - максимальное значение
+Husband.objects.aggregate(Max("age")) - возвращает словарь, с ключем age__max с максимальным значением для поля age
+Пример вывода: {'age__max': 25}
+
+* Min - минимальное значение
+Husband.objects.aggregate(Min("age")) - возвращает словарь, с ключем состоящим из age (поле для которого ищем минимум) и
+min (название агрегирующей функции)
+Пример вывода: {'age__min': 25}
+
+Еще примеры:
+Husband.objects.aggregate(Min("age"), Max("age"))
+>> {'age__min': 25, 'age__max': 40}
+Husband.objects.aggregate(young=Min("age"), old=Max("age"))
+>> {'young': 25, 'old': 40}
+Husband.objects.aggregate(res=Max("age") - Min("age")) - при вычислении значения, название поля нужно ЯВНО указать
+>> {'res': 15}
+------------------------------------------------------------
+Women.objects.values("title", "cat_id")
+* возвращает список QuerySet состаящий из словарей с полями "title" и "cat_id" модели Women
+
+Еще примеры вызовов:
+Women.objects.values("title", "cat_id").get(pk=1)
+* вернет просто словарь, так как запись всего одна
+Women.objects.values("title", "cat__name").get(pk=1)
+* вернет словарь, но дополнительно сделает INNER JOIN, чтобы получить поле name модели Category связанной с объектом модели Women
 '''
