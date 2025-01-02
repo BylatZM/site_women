@@ -22,6 +22,8 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+INTERNAL_IPS = ['127.0.0.1']
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles', # нужно чтобы django мог подключать статические файлы к проекту
-    'women.apps.WomenConfig',
+    'women.apps.WomenConfig', # указываем наше приложение, чтобы можно было с ним работать
+    'debug_toolbar', # название приложения для библиотеки django-debug-toolbar
 ]
 
 MIDDLEWARE = [
@@ -40,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware', # дополнительный пакет для работы библиотеки django-debug-toolbar
 ]
 
 ROOT_URLCONF = 'sitewomen.urls'

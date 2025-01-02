@@ -10,7 +10,7 @@ menu = [
 ]
 
 def index(request): # request экземпляр класса HttpRequest
-  posts = Women.published.filter(is_published=1)
+  posts = Women.published.filter(is_published=1).select_related('cat')
   data = {
     'title': 'Главная страница', 
     'menu': menu, 
@@ -48,7 +48,7 @@ def page_not_found(request, exception):
 
 def show_category(request, cat_slug):
   category = get_object_or_404(Category, slug=cat_slug)
-  posts = Women.published.filter(cat_id=category.pk)
+  posts = Women.published.filter(cat_id=category.pk).select_related('cat')
   data = {
     'title': f'Рублика {category.name}', 
     'menu': menu, 
@@ -59,7 +59,7 @@ def show_category(request, cat_slug):
 
 def show_tag_postlist(request, tag_slug):
   tag = get_object_or_404(TagPost, slug=tag_slug)
-  posts = tag.tags.filter(is_published=Women.Status.PUBLISHED)
+  posts = tag.tags.filter(is_published=Women.Status.PUBLISHED).select_related('cat')
 
   data = {
     'title': f"Тег: {tag.tag}",
@@ -69,6 +69,23 @@ def show_tag_postlist(request, tag_slug):
   }
 
   return render(request, 'women/index.html', context=data)
+
+'''
+полезные методы в django:
+select_related(key) - "жадная" загрузка связанных данных по внешнему ключу key, который имеет тип ForeignKey
+Women.published.filter(is_published=1).select_related('cat')
+* одним запросом отберет все данные с двух моделей
+
+prefetch_related(key) - "жадная" загрузка связанных данных по внешнему ключу key, который имеет тип ManyToManyField
+
+* в качестве параметра методам передается атрибут связывающий 2 модели
+
+* методы используются, чтобы можно было сразу одним запросом получить все записи как основной модели, так и побочных
+связанных с основной
+
+* в django по умолчанию используется ленивая загрузка данных
+* в момент обращения к атрибуту побочной модели идет select запрос на получение данных
+'''
 
 '''
 Некоторые SELECT запросы:
