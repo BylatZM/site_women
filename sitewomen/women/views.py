@@ -210,4 +210,35 @@ Women.objects.values("title", "cat_id").get(pk=1)
 * вернет просто словарь, так как запись всего одна
 Women.objects.values("title", "cat__name").get(pk=1)
 * вернет словарь, но дополнительно сделает INNER JOIN, чтобы получить поле name модели Category связанной с объектом модели Women
+------------------------------------------------------------
+Women.objects.values("cat_id").annotate(Count("id"))
+* сначала вернет все записи, где будут только поля cat_id
+* потом сгруппирует записи по похожим значениям cat_id и присвоит результат количества записей переменной id__count
+Пример вывода: <QuerySet [{'cat_id': 1, 'id__count': 3}, {'cat_id': 2, 'id__count': 2}]>
+
+! последовательное использование методов values и annotate (в связке с агрегирующей функцией) позволяет
+группировать записи по полю, указанному в values
+
+Примеры выводов:
+Women.objects.values("cat_id").annotate(total=Count("id"))
+>> <QuerySet [{'cat_id': 1, 'total': 3}, {'cat_id': 2, 'total': 2}]>
+
+Category.objects.annotate(total=Count("posts"))
+* сначала вернет все записи
+* далее для каждой записи вернет значение total равное количеству значений постов 
+(через атрибут обратного связывания posts указанного в модели Women)
+>> <QuerySet [<'Category': Актрисы>, <'Category': Певицы>, <'Category': Спортсменки>]>
+расшифровка >> [{'id': 1, 'name': 'Актрисы', 'slug': 'aktrisy', 'total': 3}, 
+{'id': 2, 'name': 'Певицы', 'slug': 'pevicy', 'total': 2}, {'id': 1, 'name': 'Спортсменки', 'slug': 'sportsmenki', 'total': 0}]
+
+! запросы с методом annotate и агрегирующих функций медленные, нужно оценивать целесобразность их использования
+------------------------------------------------------------
+from django.db.models.function import Length - функция для вычисления на стороне СУБД
+
+Husband.objects.annotate(len_name=Length('name'))
+* вернет все записи модели Husband, но добавит в них поле len_name равное длинне их полей name
+
+Примеры выводов:
+Husband.objects.annotate(len_name=Length('name')).values('len_name')
+>> <QuerySet [{'len_name': 9}, {'len_name': 10}, {'len_name': 12}, {'len_name': 10}]>
 '''
