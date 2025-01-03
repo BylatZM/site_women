@@ -41,6 +41,8 @@ class Women(models.Model):
     return self.title
   
   class Meta:
+    verbose_name = "Известные женщины" # изменяет название модели в панели администрирования (для ед.ч)
+    verbose_name_plural = "Известные женщины" # изменяет название модели в панели администрирования (для мн.ч)
     ordering = ['-time_create'] # задает сортировку по умолчанию для QuerySet
     indexes = [
       models.Index(fields=['-time_create']) # задает индексирование поля time_create с учетом сортировки (т.к добавили символ "-")

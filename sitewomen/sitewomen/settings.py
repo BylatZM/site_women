@@ -91,7 +91,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'ru-RU' # устанавливаем язык на русский (чтобы локализаци админ панели была на русском)
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
@@ -111,3 +111,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # python manage.py runserver --insecure - позволяет запустить веб сервер в режиме DEBUG=FALSE при этом статика будет подключаться
 
 # python manage.py shell - команда запускает в терминале оболочку django, позволяет выполнять ORM команды для работы с базой данных
+
+# python manage.py createsuperuser - создает пользователя, у которого будет доступ к панели администрирования
