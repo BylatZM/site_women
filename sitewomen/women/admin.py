@@ -1,6 +1,23 @@
 from django.contrib import admin, messages
 from women import models
 
+class MarriedFilter(admin.SimpleListFilter):
+  title = 'Статус женщин'
+  parameter_name = 'status'
+
+  # определяем queryset возможных значений, которые будут отображаться в фильтре
+  def lookups(self, request, model_admin):
+    # первый элемент кортежа будет использоваться в url адресе, к примеру, status=married
+    return [('married', 'Замужем', ), ('single', 'Не замужем')]
+  
+  def queryset(self, request, queryset):
+    if self.value() == 'married':
+      # отбираем все записи из модели Women, у которых поле husband не равно Null
+      return queryset.filter(husband__isnull=False)
+    if self.value() == 'single':
+      # отбираем все записи из модели Women, у которых поле husband равно Null
+      return queryset.filter(husband__isnull=True)
+
 # команда регистрирует модель, давая возможность ее просмотра в панели администрации
 # добавляем класс настроек для модели
 @admin.register(models.Women)
@@ -16,13 +33,18 @@ class WomenAdmin(admin.ModelAdmin):
   # то идет сортировка по полю title
   ordering = ['time_create', 'title']
   # позволяет редактировать указанные в атрибуте поля, не проваливаясь к конкретной записи
+  # !!! поле не может одновременно находится в переменных list_editable и list_display_links
   list_editable = ('is_published', )
   # указываем максимальное количество записей модели, которые будут отображаться на одной странице
   list_per_page = 5
   # добоавляем методы, которые мы дополнительно может применять к выбранным зааписям
   actions = ['set_published', 'set_draft']
-
-  # !!! поле не может одновременно находится в переменных list_editable и list_display_links
+  # указываем поля возможные значения которых мы хотели бы искать в поле ввода для поиска (чувстивельно к регистру)
+  # можно припысывать люкапы для полей, люкап startwith означает, будет искаться значение у поля title, начинающаяся с введенной подстроки 
+  search_fields = ['title__startswith', 'cat__name']
+  # поле добавляет блоки справа от таблицы с записями модели, которая позволит фильтровать записи по предопределенным значениям
+  # можно указать ссылку на свой собственный класс фильтрации
+  list_filter = [MarriedFilter, 'cat__name', 'is_published']
 
   # оборачиваем в декоратор, чтобы полю присвоить название, которое будет отображаться для него
   # также определяем возможную сортировку полю по полю модели 'content', то есть в лексико-графическом порядке
