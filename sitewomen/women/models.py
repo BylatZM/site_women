@@ -1,5 +1,14 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
+
+def translate_to_eng(s: str) -> str:
+  d = {'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i', 'к': 'k', 
+       'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'c',
+       'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ь': '', 'ы': 'y', 'ъ': '', 'з': 'r', 'ю': 'yu', 'я': 'ya'
+       }
+
+  return "".join(map(lambda x: d.get(x, x), s))
 
 class PublishedManager(models.Manager): # создание кастомного менеджера по типу models.OBJECTS
   def get_queryset(self): # метод отвечает за конечный базовый QuerySet, который можно уже в дальнейшем фильтровать, сортировать и т.д
@@ -53,6 +62,14 @@ class Women(models.Model):
 
   def get_absolute_url(self): # специальный метод, который может использовать admin панель для построения ссылок к конкретным записят модели
     return reverse('post', kwargs={'post_slug': self.slug})
+  
+  def save(self, *args, **kwargs):
+    # заполняем пустое поле slug с помощью метода slugify в который передаем строку title
+    # метод slugify работает только с английскими буквами, все остальные игнорируются !!
+    # чтобы избежать ошибок, мы дополнительно перед вызовом slugify переводим русские буквы в английские
+    self.slug = slugify(translate_to_eng(self.title.lower()))
+
+    super().save(*args, **kwargs)
 
 class Category(models.Model):
   name = models.CharField(max_length=100, db_index=True, verbose_name="Категория")
