@@ -10,32 +10,35 @@ class Women(models.Model):
     DRAFT = 0, 'Черновик'
     PUBLISHED = 1, 'Опубликовано'
 
-  title = models.CharField(max_length=255)
-  slug = models.SlugField(max_length=255, unique=True, db_index=True)
-  content = models.TextField(blank=True)
-  time_create = models.DateTimeField(auto_now_add=True)
-  time_update = models.DateTimeField(auto_now=True)
-  is_published = models.BooleanField(choices=Status.choices, default=Status.PUBLISHED)
+  title = models.CharField(max_length=255, verbose_name="Заголовок")
+  slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="Slug")
+  content = models.TextField(blank=True, verbose_name="Текст статьи")
+  time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
+  time_update = models.DateTimeField(auto_now=True, verbose_name="Время изменения")
+  # так как нет стандартного перечисления в формате Boolean, поэтому используем итератор map
+  # проходимся по списку вида [(0, 'Черновик', ), (1, 'Опубликовано', )]
+  # в результате возвращаем запись вида [(False, 'Черновик', ), (True, 'Опубликовано', )]
+  is_published = models.BooleanField(choices=list(map(lambda x: (bool(x[0]), x[1]), Status.choices)), default=Status.PUBLISHED, verbose_name="Статус")
   # Category прописали в виде строки, так как класс определен ниже и мы пытаемся вызвать не определенный класс
   # Модели Category будет соответствовать МНОЖЕСТВО записей из модели Women
   # Модели Women будет соответствовать ОДНА запись из модели Category
   # related_name изменяет название менеджера записи, который позволит с экземпляров класса Category получать все связанные записи из модели Women
-  cat = models.ForeignKey(to="Category", on_delete=models.PROTECT, related_name="posts")
+  cat = models.ForeignKey(to="Category", on_delete=models.PROTECT, related_name="posts", verbose_name="Категории")
   # TagPost прописали в виде строки, так как класс определен ниже и мы пытаемся вызвать не определенный класс
   # Модели TagPost будет соответствовать МНОЖЕСТВО записей из модели Women
   # Модели Women будет соответствовать МНОЖЕСТВО записей из модели TagPost
   # related_name изменяет название менеджера записи, который позволит с экземпляров класса TagPost получать все связанные записи из модели Women
-  tags = models.ManyToManyField('TagPost', blank=True, related_name='tags')
+  tags = models.ManyToManyField('TagPost', blank=True, related_name='tags', verbose_name="Теги")
   # Husband прописали в виде строки, так как класс определен ниже и мы пытаемся вызвать не определенный класс
   # Модели Husband будет соответствовать ОДНА запись из модели Women
   # Модели Women будет соответствовать ОДНА запись из модели Husband
   # related_name изменяет название менеджера записи, который позволит с экземпляра класса Husband получать связанную запись из модели Women 
-  husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True, related_name='woman')
+  husband = models.OneToOneField('Husband', on_delete=models.SET_NULL, null=True, blank=True, related_name='woman', verbose_name="Муж")
 
-  # При подключении своего собственного менеджера, менеджер objects становится недоступным
-  published = PublishedManager()
   # Чтобы иметь возможность использовать оба менеджера нужно явно его указать еще и objects менеджер
   objects = models.Manager()
+  # При подключении своего собственного менеджера, менеджер objects становится недоступным
+  published = PublishedManager()
 
   def __str__(self):
     return self.title
@@ -52,8 +55,12 @@ class Women(models.Model):
     return reverse('post', kwargs={'post_slug': self.slug})
 
 class Category(models.Model):
-  name = models.CharField(max_length=100, db_index=True)
+  name = models.CharField(max_length=100, db_index=True, verbose_name="Категория")
   slug = models.SlugField(max_length=255, unique=True, db_index=True)
+
+  class Meta:
+    verbose_name = "Категория"
+    verbose_name_plural = "Категории"
 
   def __str__(self):
     return self.name
