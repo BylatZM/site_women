@@ -12,10 +12,7 @@
   <!-- Строка добавляет в заголовок запроса дополнительную строку (ключ), без которого django не обработает запрос,
    нужен чтобы бороться с межсайтовыми атаками, а также убедиться, что запрос отправляет сам пользователь, а не взлоумышленник -->
   {% csrf_token %}
-  <p><label for="id_1">Текст: <input id="id_1" name="filed_text" type="text"></label></p>
-  <p><label for="id_2">Отметка: <input id="id_2" type="checkbox" name="filed_check"></label></p>
-  <p><label for="id_3">Число: <input id="id_3" type="number" name="filed_num"></label></p>
-  <p><label for="id_4">Пароль: <input id="id_4" type="password" name="filed_psw"></label></p>
+  {{ form.as_p }}
   <p><button type="submit">Отправить</button></p>
 </form>
 {% endblock %}

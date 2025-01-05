@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, HttpResponse
 from women.models import Women, Category, TagPost
+from .forms import AddPostForm
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -35,7 +36,21 @@ def show_post(request, post_slug):
   return render(request, "women/post.html", context=data)
 
 def addpage(request):
-  return render(request, 'women/addpage.html', {'menu': menu, 'title': 'Добавить статью'})
+  # request.method - возвращает метод с помощью которого был сделан запрос, который отрабатывает данная функция представления
+  # request.COOKIE - возвращает переданные на сервер куки файлы
+  # request.POST - python словарь с данными, переданными по POST запросу
+  # request.GET - python словарь с данными, переданными по GET запросу
+  if request.method == "POST":
+    form = AddPostForm(request.POST)
+    if form.is_valid():
+      print(form.cleaned_data)
+  else: 
+    data = {
+      'menu': menu,
+      'title': 'Добавить статью',
+      'form': AddPostForm,
+    }
+  return render(request, 'women/addpage.html', data)
 
 def login(request):
   return HttpResponse("Авторизация")
