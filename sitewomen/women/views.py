@@ -35,7 +35,7 @@ def show_post(request, post_slug):
   return render(request, "women/post.html", context=data)
 
 def addpage(request):
-  return HttpResponse("Добавление статьи")
+  return render(request, 'women/addpage.html', {'menu': menu, 'title': 'Добавить статью'})
 
 def login(request):
   return HttpResponse("Авторизация")
