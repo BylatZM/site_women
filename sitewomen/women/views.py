@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseNotFound, HttpResponse
-from women.models import Women, Category, TagPost
+from women.models import Women, Category, TagPost, translate_to_eng
 from .forms import AddPostForm
+from django.utils.text import slugify
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -43,6 +44,7 @@ def addpage(request):
   if request.method == "POST":
     form = AddPostForm(request.POST)
     if form.is_valid():
+      form.cleaned_data['slug'] = slugify(translate_to_eng(form.cleaned_data.get('title', '')))
       # print(form.cleaned_data) - выводим провалидированные данные формы, то есть проверенные на ошибки
       try:
         Women.objects.create(**form.cleaned_data)
