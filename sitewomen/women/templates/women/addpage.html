@@ -12,7 +12,11 @@
   <!-- Строка добавляет в заголовок запроса дополнительную строку (ключ), без которого django не обработает запрос,
    нужен чтобы бороться с межсайтовыми атаками, а также убедиться, что запрос отправляет сам пользователь, а не взлоумышленник -->
   {% csrf_token %}
-  {{ form.as_p }}
+  <div class="form-error">{{ form.non_field_errors }}</div>
+  {% for item in form %}
+  <p><label class="form-label" for="{{ item.id_for_label }}">{{ item.label }}</label>{{item }}</p>
+  <div class="form-error">{{ item.errors }}</div>
+  {% endfor %}
   <p><button type="submit">Отправить</button></p>
 </form>
 {% endblock %}
