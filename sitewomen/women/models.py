@@ -22,6 +22,9 @@ class Women(models.Model):
 
   title = models.CharField(max_length=255, verbose_name="Заголовок", validators=[MinLengthValidator(5, 'Минимум 5 символов'), MaxLengthValidator(100, 'Максимум 100 символов')])
   slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="Slug")
+  # загружаем файлы в папку photos/(текущий год)/(текущий месяц)/(текущий день)/
+  # в базе данных будет хранится путь к файлу
+  photo = models.ImageField(upload_to="photos/%Y/%m/%d/", default=None, blank=True, null=True, verbose_name="Фото")
   content = models.TextField(blank=True, verbose_name="Текст статьи")
   time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
   time_update = models.DateTimeField(auto_now=True, verbose_name="Время изменения")
@@ -104,6 +107,11 @@ class Husband(models.Model):
 
   def __str__(self):
     return self.name
+  
+class UploadFiles(models.Model):
+  # параметр upload_to ищет переменную media_root, если находит, то в папке media создает папку uploads_model и туда пихает все файлы
+  # при загрузке дублирующего файла, создается новый файл и в его название добавляется некая примесь из символов, к примеру "test_BC1Wa0M.jpeg"
+  file = models.FileField(upload_to='uploads_model')
 
 '''
 Типы связей между моделями в django:

@@ -22,7 +22,7 @@ class AddPostForm(forms.ModelForm):
 
   class Meta:
     model = Women
-    fields = ['title', 'content', 'is_published', 'cat', 'husband', 'tags']
+    fields = ['title', 'content', 'photo', 'is_published', 'cat', 'husband', 'tags']
     # позволяет задать стили оформления, а также формат поля
     widgets = {
       'title': forms.TextInput(attrs={'class': 'form-input'}),

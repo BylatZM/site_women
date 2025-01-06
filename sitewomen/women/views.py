@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseNotFound, HttpResponse
-from women.models import Women, Category, TagPost, translate_to_eng
+from women.models import Women, Category, TagPost, translate_to_eng, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 from django.utils.text import slugify
 from uuid import uuid4
@@ -22,18 +22,12 @@ def index(request): # request экземпляр класса HttpRequest
   }
   return render(request, "women/index.html", context=data) # функция преобразует html в строку и возвращает результат, как HttpResponse
 
-def handle_upload_file(f):
-  if not f:
-    return
-  with open (f'uploads/{uuid4()}.{f.name.split(".")[-1]}', 'ab+') as destination:
-    for chunk in f.chunks():
-      destination.write(chunk)
-
 def about(request):
   if request.method == 'POST':
     form = UploadFileForm(request.POST, request.FILES)
     if form.is_valid():
-      handle_upload_file(form.cleaned_data.get('file', None))
+      fp = UploadFiles(file=form.cleaned_data.get('file', None))
+      fp.save()
   else:
     form = UploadFileForm()
   data = {
@@ -61,7 +55,7 @@ def addpage(request):
   # request.POST - python словарь с данными, переданными по POST запросу
   # request.GET - python словарь с данными, переданными по GET запросу
   if request.method == "POST":
-    form = AddPostForm(request.POST)
+    form = AddPostForm(request.POST, request.FILES)
     if form.is_valid():
       form.cleaned_data['slug'] = slugify(translate_to_eng(form.cleaned_data.get('title', '')))
       try:

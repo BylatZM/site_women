@@ -107,7 +107,7 @@ STATIC_URL = 'static/'
 # список дополнительных (нестандартных) путей к статическим файлам, используемых для сбора и режима отладки
 STATICFILES_DIRS = [BASE_DIR / 'static', ]
 
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'media' # каталог, папка куда будут размещаться все загружаемые файлы
 MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
