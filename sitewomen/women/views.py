@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseNotFound, HttpResponse
-from women.models import Women, Category, TagPost, translate_to_eng, UploadFiles
+from women.models import Women, Category, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
-from django.utils.text import slugify
-from uuid import uuid4
+from django.views import View
+from django.views.generic import TemplateView
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -12,15 +12,25 @@ menu = [
   {'title': 'Войти', 'url_name': 'login'},
 ]
 
-def index(request): # request экземпляр класса HttpRequest
-  posts = Women.published.filter(is_published=1).select_related('cat')
-  data = {
+class WomenHome(TemplateView):
+  template_name = 'women/index.html'
+  # в словарь можно передать данные известные только на момент определения самого класса
+  # передать kwargs нельзя
+  extra_context = {
     'title': 'Главная страница', 
     'menu': menu, 
-    'posts': posts,
+    'posts': Women.published.filter(is_published=1).select_related('cat'),
     'cat_selected': 0,
   }
-  return render(request, "women/index.html", context=data) # функция преобразует html в строку и возвращает результат, как HttpResponse
+
+  # в методе можно указать какие экстра параметры через url могут быть прокинуты
+  # def get_context_data(self, **kwargs):
+  #   context = super().get_context_data(**kwargs) # возвращает словарь с данными
+  #   context['title'] = 'Главная страница'
+  #   context['menu'] = menu
+  #   context['posts'] = Women.published.filter(is_published=1).select_related('cat')
+  #   context['cat_selected'] = int(self.request.GET.get('cat_id', 0)) # получаем экстра параметр с url
+  #   return context
 
 def about(request):
   if request.method == 'POST':
@@ -49,28 +59,26 @@ def show_post(request, post_slug):
 
   return render(request, "women/post.html", context=data)
 
-def addpage(request):
-  # request.method - возвращает метод с помощью которого был сделан запрос, который отрабатывает данная функция представления
-  # request.COOKIE - возвращает переданные на сервер куки файлы
-  # request.POST - python словарь с данными, переданными по POST запросу
-  # request.GET - python словарь с данными, переданными по GET запросу
-  if request.method == "POST":
+class AddPage(View):
+  def get(self, request):
+    data = {
+      'menu': menu,
+      'title': 'Добавить статью',
+      'form': AddPostForm(),
+    }
+    return render(request, 'women/addpage.html', data)
+
+  def post(self, request):
     form = AddPostForm(request.POST, request.FILES)
     if form.is_valid():
-      form.cleaned_data['slug'] = slugify(translate_to_eng(form.cleaned_data.get('title', '')))
-      try:
-        form.save()
-        return redirect('home')
-      except:
-        form.add_error(None, "Ошибка добавления поста")
-  else: 
-    form = AddPostForm()
-  data = {
-    'menu': menu,
-    'title': 'Добавить статью',
-    'form': form,
-  }
-  return render(request, 'women/addpage.html', data)
+      form.save()
+      return redirect('home')
+    data = {
+      'menu': menu,
+      'title': 'Добавить статью',
+      'form': form,
+    }
+    return render(request, 'women/addpage.html', data)
 
 def login(request):
   return HttpResponse("Авторизация")

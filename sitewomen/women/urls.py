@@ -4,9 +4,10 @@ from . import views, converters
 register_converter(converters.FourDigitYearConverter, "year4") # функция регистрации собственных конвертеров
 
 urlpatterns = [
-  path('', views.index, name='home'), # localhost:8000
+  # внутри as_view можно указать параметр extra_context и передать туда content, данные для html шаблона
+  path('', views.WomenHome.as_view(), name='home'), # localhost:8000
   path('about/', views.about, name='about'), # localhost:8000/about/
-  path('addpage/', views.addpage, name="add_page"), # localhost:8000/add_page/
+  path('addpage/', views.AddPage.as_view(), name="add_page"), # localhost:8000/add_page/
   path('contact/', views.contact, name="contact"), # localhost:8000/contact/
   path('login/', views.login, name='login'), # localhost:8000/login/
   path('post/<slug:post_slug>/', views.show_post, name='post'),  # localhost:8000/post/slag-1/
