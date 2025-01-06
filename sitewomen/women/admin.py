@@ -24,7 +24,7 @@ class MarriedFilter(admin.SimpleListFilter):
 @admin.register(models.Women)
 class WomenAdmin(admin.ModelAdmin):
   # указываем поля, которые будут видны при открытии вкладки с моделью Women (которые можно будет сортировать)
-  list_display = ('title', 'post_photo', 'time_create', 'is_published', 'cat', )
+  list_display = ('pk', 'title', 'post_photo', 'time_create', 'is_published', 'cat', )
   # задает поля на которые можно будет кликнуть, чтобы провариться в запись
   list_display_links = ('title', )
   # выставляем сортировку записей в таблице модели по умолчанию по возрастанию для полей time_create и title

@@ -3,27 +3,18 @@ from django.http import HttpResponseNotFound, HttpResponse
 from django.urls import reverse_lazy
 from women.models import Women, UploadFiles
 from .forms import AddPostForm, UploadFileForm
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
-
-menu = [
-  {'title': 'О сайте', 'url_name': 'about'},
-  {'title': 'Добавить статью', 'url_name': 'add_page'},
-  {'title': 'Обратная связь', 'url_name': 'contact'},
-  {'title': 'Войти', 'url_name': 'login'},
-]
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .utils import DataMixin
 
 #ListView предназначен для отображения шаблонов со списком чего-нибудь, в данном случае статей
 # по умолчанию класс ListView шаблон берет по шаблону: <имя приложения>/<имя модели>_list.html
 # по умолчанию список записей указанной модели класс ListView дает доступ через переменную object_list
-class WomenHome(ListView):
+class WomenHome(DataMixin, ListView):
   model = Women
   template_name = 'women/index.html'
   context_object_name = 'posts' # переопределяем словарь с записями нашей модели
-  extra_context = { # позволяет определить статические данные, доступные в момент объявления класса
-    'title': 'Главная страница',
-    'menu': menu,
-    'cat_selected': 0
-  }
+  title_page = 'Главная страница'
+  cat_selected = 0
 
   def get_queryset(self): # позволяет указать то, что будет указано в качестве списка значений из модели Women
     return self.model.published.all().select_related('cat')
@@ -39,7 +30,6 @@ def about(request):
     form = UploadFileForm()
   data = {
     'title': 'О сайте',
-    'menu': menu,
     'form': form
   }
   return render(request, "women/about.html", data)
@@ -49,7 +39,7 @@ def about(request):
 # Если запись не будет найдена, то автоматически будет возвращена ошибка 404
 # DetailView выводит информацию по одной записи, ListView информацию по списку записей
 # по умолчанию выбранную запись модели класс DetailView передает в шаблон через переменную object
-class ShowPost(DetailView):
+class ShowPost(DataMixin, DetailView):
   model = Women
   template_name = 'women/post.html'
   slug_url_kwarg = 'post_slug' # указываем название переменной, передаваемой через url, по которой нужно искать запись в модели по полю slug
@@ -58,9 +48,7 @@ class ShowPost(DetailView):
 
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
-    context['title'] = context['post'].title
-    context['menu'] = menu
-    return context
+    return self.get_mixin_context(context, title=context['post'].title)
   
   def get_object(self, queryset=None): # метод получения самого объекта, проверим, если запись опубликовано пропускаем, иначе ошибка 404
     return get_object_or_404(self.model.published, slug=self.kwargs[self.slug_url_kwarg])
@@ -68,7 +56,7 @@ class ShowPost(DetailView):
 # класс CreateView похож на класс FormView за одним исключением, что у него реализован по умолчанию метод сохранения данных в бд
 # так как форма связана с моделью, то класс обратится к модели и вызовет метод save, чтобы сделать запрос на создание в 
 # базе данных и передать в запрос провалидированные данные
-class AddPage(CreateView):
+class AddPage(DataMixin, CreateView):
   form_class = AddPostForm # ссылка на класс формы
   template_name = 'women/addpage.html'
   # success_url определеяет url адрес после успешной отправки и обработки формы
@@ -76,15 +64,12 @@ class AddPage(CreateView):
   # используем reverse_lazy вместо reverse потому что на момент создания самого класса AddPage маршрута 'home' еще не существует
   # reverse_lazy строит маршрут не сразу, а тогда, когда он необходим
   success_url = reverse_lazy('home')
-  extra_context = {
-    'menu': menu,
-    'title': "Добавить статьи",
-  }
+  title_page = "Добавить статьи"
 
 # класс UpdateView позволяет редактировать записи из модели
 # класс UpdateView ищет запись по id или по slug-у, через url нужно передать переменную pk типа int или slug типа slug
 # есть параметры pk_url_kwarg и slug_url_kwarg также как и у DetailView
-class UpdatePage(UpdateView):
+class UpdatePage(DataMixin, UpdateView):
   model = Women # указываем модель, записи которой будет редактировать
   fields = ['title', 'content', 'photo', 'is_published', 'cat'] # Указываем поля генерируемой формы, которые будем редактировать
   template_name = 'women/addpage.html'
@@ -93,10 +78,13 @@ class UpdatePage(UpdateView):
   # используем reverse_lazy вместо reverse потому что на момент создания самого класса AddPage маршрута 'home' еще не существует
   # reverse_lazy строит маршрут не сразу, а тогда, когда он необходим
   success_url = reverse_lazy('home')
-  extra_context = {
-    'menu': menu,
-    'title': "Редактирование статьи",
-  }
+  title_page = "Редактирование статьи"
+
+class DeletePage(DataMixin, DeleteView):
+  model = Women
+  template_name = 'women/addpage.html'
+  success_url = reverse_lazy('home')
+  title_page = "Удаление статьи"
 
 def login(request):
   return HttpResponse("Авторизация")
@@ -107,7 +95,7 @@ def contact(request):
 def page_not_found(request, exception):
   return HttpResponseNotFound("<h1>Страница не найдена</h1>")
 
-class WomenCategory(ListView):
+class WomenCategory(DataMixin, ListView):
   model = Women
   template_name = 'women/index.html'
   context_object_name = 'posts'
@@ -117,16 +105,12 @@ class WomenCategory(ListView):
     #self.kwargs - возвращает словарь всех экстра параметров переданных по url
     return self.model.published.filter(cat__slug=self.kwargs.get('cat_slug')).select_related('cat')
   
-  def get_context_data(self, **kwargs): # метод определяет словарь, который будет передан в шаблон,
-    # в том числе экстра параметры, передаваемые через url
+  def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     cat = context['posts'][0].cat # передается по умолчанию, так как используем ListView, с определенными переменными model и context_object_name
-    context['title'] = 'Категория - ' + cat.name
-    context['menu'] = menu
-    context['cat_selected'] = cat.pk
-    return context
+    return self.get_mixin_context(context, title='Категория - ' + cat.name, cat_selected=cat.pk)
 
-class TagPostList(ListView):
+class TagPostList(DataMixin, ListView):
   model = Women
   context_object_name = 'posts'
   template_name = 'women/index.html'
@@ -138,10 +122,7 @@ class TagPostList(ListView):
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     tag = context['posts'].first().tags.first()
-    context['title'] = 'Тег: ' + tag.tag
-    context['menu'] = menu
-    context['cat_selected'] = None
-    return context
+    return self.get_mixin_context(context, title='Тег: ' + tag.tag)
 
 '''
 полезные методы в django:

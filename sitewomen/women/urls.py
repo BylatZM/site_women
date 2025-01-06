@@ -14,4 +14,5 @@ urlpatterns = [
   path('category/<slug:cat_slug>/', views.WomenCategory.as_view(), name='category'), # localhost:8000/category/1
   path('tag/<slug:tag_slug>/', views.TagPostList.as_view(), name='tag'), # localhost:8000/tag/blonde/
   path('edit/<slug:slug>/', views.UpdatePage.as_view(), name='edit_page'), # localhost:8000/edit/1/
+  path('delete/<int:pk>/', views.DeletePage.as_view(), name='delete_page'), # localhost:8000/delete/1/
 ]
