@@ -1,8 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseNotFound, HttpResponse
 from women.models import Women, Category, TagPost, translate_to_eng
-from .forms import AddPostForm
+from .forms import AddPostForm, UploadFileForm
 from django.utils.text import slugify
+from uuid import uuid4
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -21,8 +22,26 @@ def index(request): # request экземпляр класса HttpRequest
   }
   return render(request, "women/index.html", context=data) # функция преобразует html в строку и возвращает результат, как HttpResponse
 
+def handle_upload_file(f):
+  if not f:
+    return
+  with open (f'uploads/{uuid4()}.{f.name.split(".")[-1]}', 'ab+') as destination:
+    for chunk in f.chunks():
+      destination.write(chunk)
+
 def about(request):
-  return render(request, "women/about.html", {'title': 'О сайте', 'menu': menu})
+  if request.method == 'POST':
+    form = UploadFileForm(request.POST, request.FILES)
+    if form.is_valid():
+      handle_upload_file(form.cleaned_data.get('file', None))
+  else:
+    form = UploadFileForm()
+  data = {
+    'title': 'О сайте',
+    'menu': menu,
+    'form': form
+  }
+  return render(request, "women/about.html", data)
 
 def show_post(request, post_slug):
   post = get_object_or_404(Women, slug=post_slug) # либо возвращает 1 элемент из базы данных либо генерирует страницу с исключением 404

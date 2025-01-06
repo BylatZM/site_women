@@ -39,3 +39,7 @@ class AddPostForm(forms.ModelForm):
       raise ValidationError("Длина превышает 50 символов")
     
     return title
+  
+class UploadFileForm(forms.Form):
+  # file = forms.FileField(label="Файл") - возворяет загружать не только картинки, но и word, pdf и т.д файлы
+  file = forms.ImageField(label="Файл")

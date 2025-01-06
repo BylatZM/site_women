@@ -1,4 +1,13 @@
 {% extends 'base.html' %} <!-- Позволяет указать путь до базового шаблона -->
 {%block content %} <!-- Позволяет в конкретный участок базового шаблона запихнуть свой html код -->
   <h1>{{ title }}</h1> 
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for item in form %}
+      <p><label class="form-label" for="{{item.id_for_label}}">{{ item.label }}</label>{{item}}</p>
+      <div class="form-error">{{ item.errors }}</div>
+    {% endfor %}
+    <p><button type="submit">Отправить</button></p>
+  </form>
 {% endblock %}
