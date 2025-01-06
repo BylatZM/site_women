@@ -12,5 +12,6 @@ urlpatterns = [
   path('login/', views.login, name='login'), # localhost:8000/login/
   path('post/<slug:post_slug>/', views.ShowPost.as_view(), name='post'),  # localhost:8000/post/slag-1/
   path('category/<slug:cat_slug>/', views.WomenCategory.as_view(), name='category'), # localhost:8000/category/1
-  path('tag/<slug:tag_slug>/', views.TagPostList.as_view(), name='tag')
+  path('tag/<slug:tag_slug>/', views.TagPostList.as_view(), name='tag'), # localhost:8000/tag/blonde/
+  path('edit/<slug:slug>/', views.UpdatePage.as_view(), name='edit_page'), # localhost:8000/edit/1/
 ]

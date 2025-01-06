@@ -3,7 +3,7 @@ from django.http import HttpResponseNotFound, HttpResponse
 from django.urls import reverse_lazy
 from women.models import Women, UploadFiles
 from .forms import AddPostForm, UploadFileForm
-from django.views.generic import ListView, DetailView, FormView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -65,9 +65,10 @@ class ShowPost(DetailView):
   def get_object(self, queryset=None): # метод получения самого объекта, проверим, если запись опубликовано пропускаем, иначе ошибка 404
     return get_object_or_404(self.model.published, slug=self.kwargs[self.slug_url_kwarg])
 
-# класс FormView позволяет удобно работать с формами внутри шаблонов
-# класс FormView автоматически отдает в шаблон экземпляр класса указанного в form_class при этом экземпляр заключает в переменную form
-class AddPage(FormView):
+# класс CreateView похож на класс FormView за одним исключением, что у него реализован по умолчанию метод сохранения данных в бд
+# так как форма связана с моделью, то класс обратится к модели и вызовет метод save, чтобы сделать запрос на создание в 
+# базе данных и передать в запрос провалидированные данные
+class AddPage(CreateView):
   form_class = AddPostForm # ссылка на класс формы
   template_name = 'women/addpage.html'
   # success_url определеяет url адрес после успешной отправки и обработки формы
@@ -80,11 +81,22 @@ class AddPage(FormView):
     'title': "Добавить статьи",
   }
 
-   # метод вызывается после того, как будут проверены (проваледированы) все поля формы
-   # вызывается в том случае, если форма была заполнена корректно
-  def form_valid(self, form):
-    form.save()
-    return super().form_valid(form)
+# класс UpdateView позволяет редактировать записи из модели
+# класс UpdateView ищет запись по id или по slug-у, через url нужно передать переменную pk типа int или slug типа slug
+# есть параметры pk_url_kwarg и slug_url_kwarg также как и у DetailView
+class UpdatePage(UpdateView):
+  model = Women # указываем модель, записи которой будет редактировать
+  fields = ['title', 'content', 'photo', 'is_published', 'cat'] # Указываем поля генерируемой формы, которые будем редактировать
+  template_name = 'women/addpage.html'
+  # success_url определеяет url адрес после успешной отправки и обработки формы
+  # reverse_lazy возвращает полный маршрут, в данном случае по имени маршрута
+  # используем reverse_lazy вместо reverse потому что на момент создания самого класса AddPage маршрута 'home' еще не существует
+  # reverse_lazy строит маршрут не сразу, а тогда, когда он необходим
+  success_url = reverse_lazy('home')
+  extra_context = {
+    'menu': menu,
+    'title': "Редактирование статьи",
+  }
 
 def login(request):
   return HttpResponse("Авторизация")
