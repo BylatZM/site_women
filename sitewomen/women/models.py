@@ -24,6 +24,8 @@ class Women(models.Model):
   slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="Slug")
   # загружаем файлы в папку photos/(текущий год)/(текущий месяц)/(текущий день)/
   # в базе данных будет хранится путь к файлу
+  # при обращении через экзмпляр к переменной photo можно достать атрибут url, задающий ссылку на изображение
+  # Women.objects.get(pk=1).photo.url - "/photos/2023/09/11/rianna.jpg"
   photo = models.ImageField(upload_to="photos/%Y/%m/%d/", default=None, blank=True, null=True, verbose_name="Фото")
   content = models.TextField(blank=True, verbose_name="Текст статьи")
   time_create = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")

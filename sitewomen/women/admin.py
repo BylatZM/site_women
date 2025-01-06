@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 from women import models
 
 class MarriedFilter(admin.SimpleListFilter):
@@ -23,7 +24,7 @@ class MarriedFilter(admin.SimpleListFilter):
 @admin.register(models.Women)
 class WomenAdmin(admin.ModelAdmin):
   # указываем поля, которые будут видны при открытии вкладки с моделью Women (которые можно будет сортировать)
-  list_display = ('title', 'time_create', 'is_published', 'cat', 'brief_info', )
+  list_display = ('title', 'post_photo', 'time_create', 'is_published', 'cat', )
   # задает поля на которые можно будет кликнуть, чтобы провариться в запись
   list_display_links = ('title', )
   # выставляем сортировку записей в таблице модели по умолчанию по возрастанию для полей time_create и title
@@ -47,12 +48,12 @@ class WomenAdmin(admin.ModelAdmin):
   list_filter = [MarriedFilter, 'cat__name', 'is_published']
   # прописываем поля, которые будут отображаться в форме редактирования конкретной записи
   # порядок полей в списке, влияет на порядок отображения записей в форме
-  fields = ['title', 'slug', 'content', 'cat', 'husband', 'tags']
+  fields = ['title', 'photo', 'post_photo', 'slug', 'content', 'cat', 'husband', 'tags']
   # альтернатива списку fields, выводит все записи (кроме тех, что генерируются сами 'time_create') кроме тех, что указаны в списке
   # !!! если указал exclude, то fields не прописывается и наоборот
   #exclude = ['tags', 'is_published']
   # задаем список полей, которые будут отображаться на форме, но их нельзя будет редактировать
-  readonly_fields = ['slug']
+  readonly_fields = ['slug', 'post_photo']
   # поле позволяет указать автозаполнение атрибута "slug" данными поля "title"
   # причем в поле "slug" данные будут в формате slug
   # не работает, если запись создана и редактируется
@@ -63,13 +64,19 @@ class WomenAdmin(admin.ModelAdmin):
   # позволяет отображать поле формата ManyToMany в формате двух вертикальных блоков
   # !!! для одного поля можно задать либо filter_horizontal, либо filter_vertical
   #filter_vertical = ['tags']
+  # параметр добавляет сферху панель с кнопками "Сохранить" и другие
+  save_on_top=True
 
   # оборачиваем в декоратор, чтобы полю присвоить название, которое будет отображаться для него
   # также определяем возможную сортировку полю по полю модели 'content', то есть в лексико-графическом порядке
   # определенный метод используем в качестве нового отображаемого поля в таблице панели администрации
-  @admin.display(description="Краткое описание", ordering='content')
-  def brief_info(self, women: models.Women):
-    return f"Описание {len(women.content)} символов."
+  @admin.display(description="Изображение", ordering='content')
+  def post_photo(self, women: models.Women):
+    if women.photo:
+      # mark_safe убирает экранирование html тегов, чтобы они не воспринимались, как строка
+      return mark_safe(f"<img src='{women.photo.url}' width=50>")
+    else: 
+      return "Без фото"
   
   # метод используем чтобы добавить функционал рядом с кнопкой "удалить записи"
   # метод исменяет статус выбранных записей на "опубликовано"

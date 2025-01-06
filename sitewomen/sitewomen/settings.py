@@ -108,7 +108,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static', ]
 
 MEDIA_ROOT = BASE_DIR / 'media' # каталог, папка куда будут размещаться все загружаемые файлы
-MEDIA_URL = '/media/'
+MEDIA_URL = '/media/' # добавляет префикс ко всем url адресам медиа файлов, по типу картинок
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
