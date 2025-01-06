@@ -22,6 +22,31 @@
 
 {% endblock %}
 
+{% block navigation %}
+{% if page_obj.has_other_pages %}
+<nav class="list-pages">
+  <ul>
+    <!-- Если предыдущая страница существует, то выводим кнопку, которая позволит перейти на одну страницу назад -->
+    {% if page_obj.has_previous %}
+      <li class="page-num"><a href="?page={{ page_obj.previous_page_number }}">&lt;</a></li>
+    {% endif %}
+    {% for p in paginator.page_range %}
+    {% if page_obj.number == p %}
+      <li class="page-num page-num-selected"><a href="?page={{ p }}">{{ p }}</a></li>
+    <!-- Пусть текущая страница 4, тогда показать на странице номера в диапазоне [2, 3, 4, 5, 6] -->
+    {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:+2 %}
+      <li class="page-num"><a href="?page={{ p }}">{{ p }}</a></li>
+    {% endif %}
+    {% endfor %}
+    <!-- Если следующая страница существует, то выводим кнопку, которая позволит перейти на одну страницу вперед -->
+    {% if page_obj.has_next %}
+    <li class="page-num"><a href="?page={{ page_obj.next_page_number }}">&gt;</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
 '''
 Еще фильтры в html: 
 -------------------

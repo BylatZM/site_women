@@ -10,6 +10,8 @@ from django.core.paginator import Paginator
 #ListView предназначен для отображения шаблонов со списком чего-нибудь, в данном случае статей
 # по умолчанию класс ListView шаблон берет по шаблону: <имя приложения>/<имя модели>_list.html
 # по умолчанию список записей указанной модели класс ListView дает доступ через переменную object_list
+# в ListView есть функционал пагинации, чтобы указать количество записей модели нужно задать атрибут paginate_by
+# в template ListView передает экземпляр класса пагинации под названием page_obj
 class WomenHome(DataMixin, ListView):
   model = Women
   template_name = 'women/index.html'
