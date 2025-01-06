@@ -1,9 +1,9 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, HttpResponse
+from django.urls import reverse_lazy
 from women.models import Women, UploadFiles
 from .forms import AddPostForm, UploadFileForm
-from django.views import View
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, FormView
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -65,26 +65,26 @@ class ShowPost(DetailView):
   def get_object(self, queryset=None): # метод получения самого объекта, проверим, если запись опубликовано пропускаем, иначе ошибка 404
     return get_object_or_404(self.model.published, slug=self.kwargs[self.slug_url_kwarg])
 
-class AddPage(View):
-  def get(self, request):
-    data = {
-      'menu': menu,
-      'title': 'Добавить статью',
-      'form': AddPostForm(),
-    }
-    return render(request, 'women/addpage.html', data)
+# класс FormView позволяет удобно работать с формами внутри шаблонов
+# класс FormView автоматически отдает в шаблон экземпляр класса указанного в form_class при этом экземпляр заключает в переменную form
+class AddPage(FormView):
+  form_class = AddPostForm # ссылка на класс формы
+  template_name = 'women/addpage.html'
+  # success_url определеяет url адрес после успешной отправки и обработки формы
+  # reverse_lazy возвращает полный маршрут, в данном случае по имени маршрута
+  # используем reverse_lazy вместо reverse потому что на момент создания самого класса AddPage маршрута 'home' еще не существует
+  # reverse_lazy строит маршрут не сразу, а тогда, когда он необходим
+  success_url = reverse_lazy('home')
+  extra_context = {
+    'menu': menu,
+    'title': "Добавить статьи",
+  }
 
-  def post(self, request):
-    form = AddPostForm(request.POST, request.FILES)
-    if form.is_valid():
-      form.save()
-      return redirect('home')
-    data = {
-      'menu': menu,
-      'title': 'Добавить статью',
-      'form': form,
-    }
-    return render(request, 'women/addpage.html', data)
+   # метод вызывается после того, как будут проверены (проваледированы) все поля формы
+   # вызывается в том случае, если форма была заполнена корректно
+  def form_valid(self, form):
+    form.save()
+    return super().form_valid(form)
 
 def login(request):
   return HttpResponse("Авторизация")
