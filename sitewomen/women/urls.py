@@ -10,7 +10,7 @@ urlpatterns = [
   path('addpage/', views.AddPage.as_view(), name="add_page"), # localhost:8000/add_page/
   path('contact/', views.contact, name="contact"), # localhost:8000/contact/
   path('login/', views.login, name='login'), # localhost:8000/login/
-  path('post/<slug:post_slug>/', views.show_post, name='post'),  # localhost:8000/post/slag-1/
+  path('post/<slug:post_slug>/', views.ShowPost.as_view(), name='post'),  # localhost:8000/post/slag-1/
   path('category/<slug:cat_slug>/', views.WomenCategory.as_view(), name='category'), # localhost:8000/category/1
-  path('tag/<slug:tag_slug>/', views.show_tag_postlist, name='tag')
+  path('tag/<slug:tag_slug>/', views.TagPostList.as_view(), name='tag')
 ]

@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseNotFound, HttpResponse
-from women.models import Women, TagPost, UploadFiles
+from women.models import Women, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -44,17 +44,26 @@ def about(request):
   }
   return render(request, "women/about.html", data)
 
-def show_post(request, post_slug):
-  post = get_object_or_404(Women, slug=post_slug) # либо возвращает 1 элемент из базы данных либо генерирует страницу с исключением 404
+# DetailView класс предназначен для вывода в template детальной информации по конкретному экземпляру модели
+# Ищет запись по pk или по slug
+# Если запись не будет найдена, то автоматически будет возвращена ошибка 404
+# DetailView выводит информацию по одной записи, ListView информацию по списку записей
+# по умолчанию выбранную запись модели класс DetailView передает в шаблон через переменную object
+class ShowPost(DetailView):
+  model = Women
+  template_name = 'women/post.html'
+  slug_url_kwarg = 'post_slug' # указываем название переменной, передаваемой через url, по которой нужно искать запись в модели по полю slug
+  context_object_name = 'post' # указываем название переменной, которая будет содержать единственную запись модели
+  # pk_url_kwarg = 'post_pk' - указываем название переменной, передаваемой через url, по которой нужно искать запись в модели по полю pk
 
-  data = {
-    'title': post.title,
-    'menu': menu,
-    'post': post,
-    'cat_selected': 1,
-  }
-
-  return render(request, "women/post.html", context=data)
+  def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    context['title'] = context['post'].title
+    context['menu'] = menu
+    return context
+  
+  def get_object(self, queryset=None): # метод получения самого объекта, проверим, если запись опубликовано пропускаем, иначе ошибка 404
+    return get_object_or_404(self.model.published, slug=self.kwargs[self.slug_url_kwarg])
 
 class AddPage(View):
   def get(self, request):
@@ -105,18 +114,22 @@ class WomenCategory(ListView):
     context['cat_selected'] = cat.pk
     return context
 
-def show_tag_postlist(request, tag_slug):
-  tag = get_object_or_404(TagPost, slug=tag_slug)
-  posts = tag.tags.filter(is_published=Women.Status.PUBLISHED).select_related('cat')
+class TagPostList(ListView):
+  model = Women
+  context_object_name = 'posts'
+  template_name = 'women/index.html'
+  allow_empty = False # при пустом списке posts генерирует ошибку 404
 
-  data = {
-    'title': f"Тег: {tag.tag}",
-    'menu': menu,
-    'posts': posts,
-    'cat_selected': None,
-  }
-
-  return render(request, 'women/index.html', context=data)
+  def get_queryset(self):
+    return self.model.published.filter(tags__slug=self.kwargs.get('tag_slug')).select_related('cat')
+  
+  def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    tag = context['posts'].first().tags.first()
+    context['title'] = 'Тег: ' + tag.tag
+    context['menu'] = menu
+    context['cat_selected'] = None
+    return context
 
 '''
 полезные методы в django:
