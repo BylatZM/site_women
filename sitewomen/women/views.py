@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseNotFound, HttpResponse
-from women.models import Women, Category, TagPost, UploadFiles
+from women.models import Women, TagPost, UploadFiles
 from .forms import AddPostForm, UploadFileForm
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import ListView
 
 menu = [
   {'title': 'О сайте', 'url_name': 'about'},
@@ -12,25 +12,22 @@ menu = [
   {'title': 'Войти', 'url_name': 'login'},
 ]
 
-class WomenHome(TemplateView):
+#ListView предназначен для отображения шаблонов со списком чего-нибудь, в данном случае статей
+# по умолчанию класс ListView шаблон берет по шаблону: <имя приложения>/<имя модели>_list.html
+# по умолчанию список записей указанной модели класс ListView дает доступ через переменную object_list
+class WomenHome(ListView):
+  model = Women
   template_name = 'women/index.html'
-  # в словарь можно передать данные известные только на момент определения самого класса
-  # передать kwargs нельзя
-  extra_context = {
-    'title': 'Главная страница', 
-    'menu': menu, 
-    'posts': Women.published.filter(is_published=1).select_related('cat'),
-    'cat_selected': 0,
+  context_object_name = 'posts' # переопределяем словарь с записями нашей модели
+  extra_context = { # позволяет определить статические данные, доступные в момент объявления класса
+    'title': 'Главная страница',
+    'menu': menu,
+    'cat_selected': 0
   }
 
-  # в методе можно указать какие экстра параметры через url могут быть прокинуты
-  # def get_context_data(self, **kwargs):
-  #   context = super().get_context_data(**kwargs) # возвращает словарь с данными
-  #   context['title'] = 'Главная страница'
-  #   context['menu'] = menu
-  #   context['posts'] = Women.published.filter(is_published=1).select_related('cat')
-  #   context['cat_selected'] = int(self.request.GET.get('cat_id', 0)) # получаем экстра параметр с url
-  #   return context
+  def get_queryset(self): # позволяет указать то, что будет указано в качестве списка значений из модели Women
+    return self.model.published.all().select_related('cat')
+  # чтобы динамически определять параметры передаваемые в шаблон, можно переопределить метод get_context_data
 
 def about(request):
   if request.method == 'POST':
@@ -89,16 +86,24 @@ def contact(request):
 def page_not_found(request, exception):
   return HttpResponseNotFound("<h1>Страница не найдена</h1>")
 
-def show_category(request, cat_slug):
-  category = get_object_or_404(Category, slug=cat_slug)
-  posts = Women.published.filter(cat_id=category.pk).select_related('cat')
-  data = {
-    'title': f'Рублика {category.name}', 
-    'menu': menu, 
-    'posts': posts,
-    'cat_selected': category.pk,
-  }
-  return render(request, "women/index.html", context=data)
+class WomenCategory(ListView):
+  model = Women
+  template_name = 'women/index.html'
+  context_object_name = 'posts'
+  allow_empty = False # при пустом списке posts генерирует ошибку 404
+
+  def get_queryset(self):
+    #self.kwargs - возвращает словарь всех экстра параметров переданных по url
+    return self.model.published.filter(cat__slug=self.kwargs.get('cat_slug')).select_related('cat')
+  
+  def get_context_data(self, **kwargs): # метод определяет словарь, который будет передан в шаблон,
+    # в том числе экстра параметры, передаваемые через url
+    context = super().get_context_data(**kwargs)
+    cat = context['posts'][0].cat # передается по умолчанию, так как используем ListView, с определенными переменными model и context_object_name
+    context['title'] = 'Категория - ' + cat.name
+    context['menu'] = menu
+    context['cat_selected'] = cat.pk
+    return context
 
 def show_tag_postlist(request, tag_slug):
   tag = get_object_or_404(TagPost, slug=tag_slug)
