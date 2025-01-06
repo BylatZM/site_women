@@ -7,6 +7,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('women.urls')),
+    path('users/', include('users.urls'), name="users"),
     path('__debug__/', include("debug_toolbar.urls")),
 ]
 

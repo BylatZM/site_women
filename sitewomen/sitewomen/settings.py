@@ -31,16 +31,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles', # нужно чтобы django мог подключать статические файлы к проекту
-    'women.apps.WomenConfig', # указываем наше приложение, чтобы можно было с ним работать
+    'women.apps.WomenConfig', # указываем наше приложение women, чтобы можно было с ним работать
     'debug_toolbar', # название приложения для библиотеки django-debug-toolbar
+    'users.apps.UsersConfig', # указываем наше приложение women, чтобы можно было с ним работать
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', # чтобы работали сессии, с помощью которых работает доступ к admin панели
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # чтобы работала авторизация
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware', # дополнительный пакет для работы библиотеки django-debug-toolbar
