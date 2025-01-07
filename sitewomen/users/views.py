@@ -1,5 +1,6 @@
-from .forms import LoginUserForm
+from .forms import LoginUserForm, RegisterUserForm
 from django.contrib.auth.views import LoginView
+from django.shortcuts import render
 
 # LoginView класс представления, который позволяет удобно аутентифицировать пользователя на сайте
 # AuthenticationForm - форма для аутентификации пользователя, предоставляет форму с полями username и password
@@ -16,3 +17,17 @@ class LoginUser(LoginView):
   # можно в качестве альтернативы добавить пометку в файл settings.py
   # def get_success_url(self):
   #   return reverse_lazy('home')
+
+def register(request):
+  if request.method == 'POST':
+    form = RegisterUserForm(request.POST)
+    if form.is_valid():
+      # метод save возвращает экземпляр модели, а также делает SQL запрос на создание записи таблице бд, НО 
+      # атрибут со значением commit=False отменяет SQL запрос на создание
+      user = form.save(commit=False)
+      user.set_password(form.cleaned_data.get('password'))
+      user.save()
+      return render(request, 'users/register_done.html')
+  else:
+    form = RegisterUserForm()
+  return render(request, 'users/register.html', {'form': form})
