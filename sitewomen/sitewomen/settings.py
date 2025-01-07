@@ -60,9 +60,10 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request', # позволяет обращаться к переменной request внутри шаблонов
+                'django.contrib.auth.context_processors.auth', # позволяет обращаться к переменной user внутри шаблонов
                 'django.contrib.messages.context_processors.messages',
+                'users.context_processors.get_women_context', # определили функцию, которая во все шаблоны будет передавать переменную mainmenu с нашим меню
             ],
         },
     },

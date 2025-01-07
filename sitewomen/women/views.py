@@ -84,9 +84,6 @@ class DeletePage(DataMixin, DeleteView):
   success_url = reverse_lazy('home')
   title_page = "Удаление статьи"
 
-def login(request):
-  return HttpResponse("Авторизация")
-
 def contact(request):
   return HttpResponse("Обратная связь")
 
