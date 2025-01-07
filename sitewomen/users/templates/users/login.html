@@ -5,7 +5,19 @@
 
 <form action="" method="post">
   {% csrf_token %}
-  {{ form.as_p }}
+  <!-- параметер next, django формирует самостоятельно для класса формы AuthenticationForm, от которой наследуется LoginUserForm -->
+  <!-- данный input сработает, если пользователь хотел получить доступ к странице требующей авторизации, но был перенаправлен 
+  на форму авторизации и после успешной авторизации его перенаправить на страницу, на которую он хотел изначально попасть -->
+  <!-- редирект с next будет осуществел, если next будет содержать путь, на который нужно перенаправить, иначе перенаправит 
+  по переменной LOGIN_REDIRECT_URL-->
+  <!-- Чтобы редирект работал правильно, желательно затереть переопределение метода get_success_url в классе представления
+  LoginUser. При этом редирект с помощью next будет иметь больший приоритет чем переменная LOGIN_REDIRECT_URL в settings.py -->
+  <input type="hidden" name="next" value="{{ next }}" />
+  <div class="form-error">{{ form.non_field_errors }}</div>
+  {% for f in form %}
+    <p><label for="{{ f.id_for_label }}" class="form-label">{{ f.label }}</label>{{ f }}</p>
+    <div class="form-error">{{ f.errors }}</div>
+  {% endfor %}
   <p><button type="submit">Войти</button></p>
 </form>
 {% endblock %}

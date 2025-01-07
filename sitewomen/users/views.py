@@ -1,29 +1,18 @@
-from django.http import HttpResponseRedirect
 from .forms import LoginUserForm
-from django.shortcuts import render
-from django.urls import reverse
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import LoginView
 
-def login_user(request):
-  if request.method == 'POST':
-    form = LoginUserForm(request.POST)
-    if form.is_valid():
-      cd = form.cleaned_data
-      # аутентифицируем пользователя
-      # authenticate проверяет есть ли в бд модели User пользователь с таким username и паролем
-      # возвращает либо объект модели User либо None
-      user = authenticate(request, username=cd['username'], password=cd['password'])
-      if user and user.is_active:
-        # Авторизуем пользователя, навешиваем сессию
-        # С помощью навешенной сессии можно заходить на панель администрации, если пользователь имеет на это права
-        login(request, user)
-        return HttpResponseRedirect(reverse('home'))
-  else:
-    form = LoginUserForm()
-  return render(request, 'users/login.html', {'form': form})
+# LoginView класс представления, который позволяет удобно аутентифицировать пользователя на сайте
+# AuthenticationForm - форма для аутентификации пользователя, предоставляет форму с полями username и password
+# класс AuthenticationForm использует набор методов и атрибутов, которые работают в связке с LoginView
+# поэтому заменить этот класс формы на свой проблемотично, но возможно
+# чтобы решить проблему нужно наш класс формы LoginUserForm унаследовать от AuthenticationForm
+# при успешной авторизации, по умолчанию перенаправляет пользователя по адресу localhost:8000/accounts/profile/
+class LoginUser(LoginView):
+  form_class = LoginUserForm
+  template_name = 'users/login.html'
+  extra_context = {'title': 'Авторизация'}
 
-def logout_user(request):
-  # метод убирает из куки сессию, а также пометки, что пользователь авторизован
-  logout(request)
-  # задает пространство имен с разделителем ":"
-  return HttpResponseRedirect(reverse('users:login'))
+  # изменяем url адрес на который нужно перенаправить пользователя, при успешной авторизации
+  # можно в качестве альтернативы добавить пометку в файл settings.py
+  # def get_success_url(self):
+  #   return reverse_lazy('home')
