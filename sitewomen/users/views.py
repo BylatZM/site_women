@@ -1,6 +1,9 @@
 from .forms import LoginUserForm, RegisterUserForm
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from women.utils import DataMixin
 
 # LoginView класс представления, который позволяет удобно аутентифицировать пользователя на сайте
 # AuthenticationForm - форма для аутентификации пользователя, предоставляет форму с полями username и password
@@ -18,16 +21,8 @@ class LoginUser(LoginView):
   # def get_success_url(self):
   #   return reverse_lazy('home')
 
-def register(request):
-  if request.method == 'POST':
-    form = RegisterUserForm(request.POST)
-    if form.is_valid():
-      # метод save возвращает экземпляр модели, а также делает SQL запрос на создание записи таблице бд, НО 
-      # атрибут со значением commit=False отменяет SQL запрос на создание
-      user = form.save(commit=False)
-      user.set_password(form.cleaned_data.get('password'))
-      user.save()
-      return render(request, 'users/register_done.html')
-  else:
-    form = RegisterUserForm()
-  return render(request, 'users/register.html', {'form': form})
+class Register(CreateView):
+  form_class = RegisterUserForm
+  template_name = 'users/register.html'
+  extra_context = {'title': 'Регистрация'}
+  success_url = reverse_lazy('users:login')
