@@ -11,4 +11,5 @@ urlpatterns = [
   # чтобы изменить поведение можно задать переменную LOGOUT_REDIRECT_URL в settings.py
   path('logout/', LogoutView.as_view(), name='logout'), # localhost:8000/users/logout/
   path('register/', views.Register.as_view(), name='register'), # localhost:8000/register/
+  path('profile/', views.ProfileUser.as_view(), name="profile"), # localhost:8000/profile/1/
 ]
