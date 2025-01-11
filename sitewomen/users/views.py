@@ -5,6 +5,7 @@ from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import PasswordChangeView
+from sitewomen import settings
 
 # LoginView класс представления, который позволяет удобно аутентифицировать пользователя на сайте
 # AuthenticationForm - форма для аутентификации пользователя, предоставляет форму с полями username и password
@@ -34,7 +35,7 @@ class ProfileUser(LoginRequiredMixin, UpdateView):
   model = get_user_model()
   template_name = 'users/profile.html'
   form_class = ProfileUserForm
-  extra_context = {'title': 'Профиль'}
+  extra_context = {'title': 'Профиль', 'default_image': settings.DEFAULT_USER_IMAGE}
 
   # метод позволяет задать ссылку по которой будет перенаправлен пользователь в случае успешного обновления данных профиля
   def get_success_url(self):
