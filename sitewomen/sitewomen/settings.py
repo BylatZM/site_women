@@ -20,9 +20,9 @@ SECRET_KEY = env('SECRET_KEY')
 
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] # список доверенных хостов, с которых будет работать django приложение
 
-INTERNAL_IPS = ['127.0.0.1']
+INTERNAL_IPS = ['127.0.0.1'] # необходим для корректной работы django-debug-toolbar
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -131,29 +131,17 @@ AUTHENTICATION_BACKENDS = [ # backend классы, ответственные �
   'users.authentication.EmailAuthBackend', # свой backend класс для авторизации по паролю и E-mail
 ]
 
-# путь до класса, позволяющего отправлять email письма в консоль
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-'''
-Чтобы посмотреть работу отправки письма в консоль нужно:
-1) активировать виртуальное окрушение
-2) выполнить команду 'python manage.py shell'
-3) импортировать нужный метод 'from django.core.mail import send_mail'
-4) выполнить отправку письма
-send_mail('От ...', 'Поздравляю', 'root@site.come', ['yo@mail.com'])
-Вот что будет выведено на консоль:
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: ...
-Subject: ...
-From: root@site.come
-To: yo@mail.com
-Date: ...
-Message-ID: <...>
+# путь до класса, позволяющего отправлять email письма через smtp протокол
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST=env("EMAIL_HOST")
+EMAIL_HOST_PASSWORD=env("EMAIL_HOST_PASSWORD")
+EMAIL_PORT=env("EMAIL_PORT")
+EMAIL_HOST_USER=env("EMAIL_HOST_USER")
+EMAIL_USE_SSL=env("EMAIL_USE_SSL")
 
-Поздравляю
--------------------------------------------------------------------------------
-1
-'''
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER # E-mail с которого по умолчанию будут отправляться данные
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
 
 # python manage.py runserver --insecure - позволяет запустить веб сервер в режиме DEBUG=FALSE при этом статика будет подключаться
 
