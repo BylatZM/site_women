@@ -4,6 +4,8 @@ from django.urls import reverse_lazy
 from women.models import Women
 from .forms import AddPostForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.decorators import permission_required
 from .utils import DataMixin
 from django.core.paginator import Paginator
 
@@ -54,7 +56,8 @@ class ShowPost(DataMixin, DetailView):
 # класс CreateView похож на класс FormView за одним исключением, что у него реализован по умолчанию метод сохранения данных в бд
 # так как форма связана с моделью, то класс обратится к модели и вызовет метод save, чтобы сделать запрос на создание в 
 # базе данных и передать в запрос провалидированные данные
-class AddPage(DataMixin, CreateView):
+# PermissionRequiredMixin - класс, который позволит ограничить доступ к шаблону, давая доступ только авторизованному пользователю
+class AddPage(PermissionRequiredMixin, DataMixin, CreateView):
   form_class = AddPostForm # ссылка на класс формы
   template_name = 'women/addpage.html'
   # success_url определеяет url адрес после успешной отправки и обработки формы
@@ -63,11 +66,17 @@ class AddPage(DataMixin, CreateView):
   # reverse_lazy строит маршрут не сразу, а тогда, когда он необходим
   success_url = reverse_lazy('home')
   title_page = "Добавить статьи"
+  # permission_required позволяет прописать какие действия может совершать пользователь с определенными правами
+  # в данном случае, если через панель администрации дать пользователю разрешение вида: Can add известные женщины, то пользователю разблокируется страница
+  # если пользователь не будет иметь данное право, то он получит ошибку 403 Forbidden
+  # по умолчанию пользователь в модели User которого указаны is_superuser: True имеет все права
+  # women.add_women - women нанвание приложения, add - право добавлять записи, women - название модели, в которую разрешено добавлять
+  permission_required = 'women.add_women'
 
 # класс UpdateView позволяет редактировать записи из модели
 # класс UpdateView ищет запись по id или по slug-у, через url нужно передать переменную pk типа int или slug типа slug
 # есть параметры pk_url_kwarg и slug_url_kwarg также как и у DetailView
-class UpdatePage(DataMixin, UpdateView):
+class UpdatePage(PermissionRequiredMixin, DataMixin, UpdateView):
   model = Women # указываем модель, записи которой будет редактировать
   fields = ['title', 'content', 'photo', 'is_published', 'cat'] # Указываем поля генерируемой формы, которые будем редактировать
   template_name = 'women/addpage.html'
@@ -77,13 +86,20 @@ class UpdatePage(DataMixin, UpdateView):
   # reverse_lazy строит маршрут не сразу, а тогда, когда он необходим
   success_url = reverse_lazy('home')
   title_page = "Редактирование статьи"
+  # даем права на изменение модели Women
+  permission_required = "women.change_women"
 
-class DeletePage(DataMixin, DeleteView):
+class DeletePage(PermissionRequiredMixin, DataMixin, DeleteView):
   model = Women
   template_name = 'women/addpage.html'
   success_url = reverse_lazy('home')
   title_page = "Удаление статьи"
+  permission_required = 'women.delete_women'
+  permission_denied_message = 'Недостаточно прав доступа'
 
+# декоратор для ограничения доступа к view функции только авторизованным пользователям
+# perm указывает какой тип разрешения нужен, а raise_exception нужно ли выводить ошибку 403, если False, то перенаправит на страницу авторизации
+@permission_required(perm='women.view_women', raise_exception=True)
 def contact(request):
   return HttpResponse("Обратная связь")
 
